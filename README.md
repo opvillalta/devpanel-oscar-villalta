@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DevPanel — Oscar Villalta
 
-## Getting Started
+Panel de administración de usuarios con autenticación JWT. Proyecto de evaluación técnica.
 
-First, run the development server:
+## Stack
+
+Next.js 16 + TypeScript + SQLite (`better-sqlite3`) + JWT propio (`jose`). Todo en un solo repo, sin base de datos externa ni Docker.
+
+## Prerrequisitos
+
+- Node.js 20+
+- pnpm (`npm install -g pnpm`)
+
+## Cómo correrlo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# 1. Clonar e instalar dependencias
+pnpm install
+
+# 2. Crear el archivo de variables de entorno
+cp .env.example .env
+
+# 3. Poblar la base de datos con usuarios de prueba
+pnpm db:seed
+
+# 4. Levantar el servidor de desarrollo
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abrí http://localhost:3000 — te redirige automáticamente al login.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Credenciales de prueba
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Email | Contraseña | Rol |
+|---|---|---|
+| admin@devpanel.com | password123 | admin |
+| manager@devpanel.com | password123 | manager |
+| user@devpanel.com | password123 | user |
 
-## Learn More
+## Decisiones técnicas
 
-To learn more about Next.js, take a look at the following resources:
+- **JWT en cookie httpOnly**: el token nunca toca JavaScript del cliente, lo que protege contra ataques XSS. Es el mismo patrón que ya uso en producción.
+- **SQLite sin ORM**: cero configuración de servidor, cero Docker. El archivo `.db` se genera localmente al correr el seed.
+- **Next.js full-stack**: un solo repo maneja tanto el frontend como las API routes, sin necesidad de separar proyectos ni configurar CORS.
+- **Búsqueda con debounce (300ms)**: el input de búsqueda espera que el usuario termine de escribir antes de hacer el fetch, evitando una request por cada letra.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Oportunidad de escalamiento
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- No hay CRUD: los usuarios solo se pueden ver, no crear, editar ni eliminar desde la UI.
+- No hay filtro por rol en la tabla (solo búsqueda por nombre/email).
+- La cookie no tiene el flag `Secure` porque corre en HTTP local; en producción sí se activaría.
+- No hay tests unitarios ni de integración.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
