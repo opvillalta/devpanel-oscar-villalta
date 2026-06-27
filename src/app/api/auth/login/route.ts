@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     const { email, password } = await req.json();
 
     const user = db
-        .prepare("SELECT * FROM users WHERE email = ?")
+        .prepare("SELECT * FROM users WHERE email = ? AND status = 'active'")
         .get(email) as {
             id: number;
             email: string;
